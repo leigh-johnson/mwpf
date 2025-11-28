@@ -409,7 +409,7 @@ def add_herald_detectors(circuit: stim.Circuit) -> stim.Circuit:
                         targets=(rec,),
                     ),
                 )
-    return RefCircuit.of(new_instructions).circuit()
+    return RefCircuit.of(new_instructions).circuit
 
 
 def remove_herald_detectors(circuit: stim.Circuit) -> stim.Circuit:
@@ -435,7 +435,7 @@ def remove_herald_detectors(circuit: stim.Circuit) -> stim.Circuit:
         assert isinstance(rec, RefRec)
         if not is_heralded_error(rec.instruction):
             new_instructions.append(instruction)
-    return RefCircuit.of(new_instructions).circuit()
+    return RefCircuit.of(new_instructions).circuit
 
 
 def is_heralded_error(instruction: RefInstruction) -> bool:

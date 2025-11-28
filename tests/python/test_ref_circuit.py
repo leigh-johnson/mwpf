@@ -47,7 +47,7 @@ DETECTOR(3, 1) abs[5] abs[4] abs[1]
 OBSERVABLE_INCLUDE(0) abs[5]\
 """
     )
-    circuit_2 = ref_circuit.circuit()
+    circuit_2 = ref_circuit.circuit
     print("######### new circuit #########")
     print(circuit_2)
     assert isinstance(circuit_2, stim.Circuit)
@@ -155,7 +155,7 @@ DETECTOR abs[5]
 DETECTOR abs[4]\
 """
     )
-    circuit_2 = ref_circuit.circuit()
+    circuit_2 = ref_circuit.circuit
     print("######### new circuit #########")
     print(circuit_2)
     assert isinstance(circuit_2, stim.Circuit)
@@ -223,7 +223,7 @@ DETECTOR abs[5]
 DETECTOR abs[4]\
 """
     )
-    circuit_2 = ref_circuit.circuit()
+    circuit_2 = ref_circuit.circuit
     print("######### new circuit #########")
     print(circuit_2)
     assert isinstance(circuit_2, stim.Circuit)

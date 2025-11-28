@@ -315,6 +315,7 @@ class RefCircuit:
     def ref_dem(self) -> "RefDetectorErrorModel":
         return RefDetectorErrorModel.of(self)
 
+    @functools.cached_property
     def circuit(self) -> stim.Circuit:
         circuit = stim.Circuit()
         for stim_instruction in self.stim_instructions:
@@ -511,7 +512,7 @@ class RefDetectorErrorModel:
     ) -> "RefDetectorErrorModel":
         if dem is None:
             assert ref_circuit is not None, "circuit and dem cannot be both None"
-            dem = ref_circuit.circuit().detector_error_model(
+            dem = ref_circuit.circuit.detector_error_model(
                 approximate_disjoint_errors=True, flatten_loops=True
             )
         if ref_circuit is None:
