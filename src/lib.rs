@@ -77,6 +77,8 @@ fn mwpf(m: &Bound<'_, PyModule>) -> PyResult<()> {
     html_export::register(m)?;
     util_py::register(m)?;
     m.add_wrapped(wrap_pyfunction!(run_cli))?;
+    // Add __version__ attribute based on Cargo.toml's version
+    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
 
