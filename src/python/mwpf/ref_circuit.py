@@ -224,21 +224,21 @@ class RefCircuit:
         for instruction in self.instructions:
             yield instruction
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def recs(self) -> tuple[RefRec, ...]:
         recs: list[RefRec] = []
         for instruction in self.instructions:
             recs.extend(instruction.recs)
         return tuple(recs)
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def rec_to_index(self) -> frozendict[RefRec, int]:
         return frozendict({ref_rec: index for index, ref_rec in enumerate(self.recs)})
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def rec_to_detectors(self) -> frozendict[RefRec, tuple[RefDetector, ...]]:
         rec_to_detectors: dict[RefRec, list[RefDetector]] = {
             rec: [] for rec in self.recs
@@ -254,14 +254,15 @@ class RefCircuit:
             }
         )
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def instruction_to_index(self) -> frozendict[RefInstruction, int]:
         return frozendict(
             {instruction: index for index, instruction in enumerate(self.instructions)}
         )
 
-    @functools.cached_property
+    @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def instruction_rec_biases(self) -> tuple[int, ...]:
         rec_bias: int = 0
         rec_biases: list[int] = []
@@ -270,7 +271,8 @@ class RefCircuit:
             rec_bias += instruction.num_measurements
         return tuple(rec_biases)
 
-    @functools.cached_property
+    @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def instruction_to_rec_bias(self) -> frozendict[RefInstruction, int]:
         return frozendict(
             {
@@ -281,8 +283,8 @@ class RefCircuit:
             }
         )
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def detectors(self) -> tuple[RefDetector, ...]:
         detectors: list[RefDetector] = []
         for instruction in self.instructions:
@@ -290,15 +292,15 @@ class RefCircuit:
                 detectors.append(instruction)
         return tuple(detectors)
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def detector_to_index(self) -> frozendict[RefDetector, int]:
         return frozendict(
             {detector: index for index, detector in enumerate(self.detectors)}
         )
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def stim_instructions(self) -> tuple[stim.CircuitInstruction, ...]:
         stim_instructions: list[stim.CircuitInstruction] = []
         for instruction in self.instructions:
@@ -320,13 +322,13 @@ class RefCircuit:
             )
         return tuple(stim_instructions)
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def ref_dem(self) -> "RefDetectorErrorModel":
         return RefDetectorErrorModel.of(self)
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def circuit(self) -> stim.Circuit:
         circuit = stim.Circuit()
         for stim_instruction in self.stim_instructions:
@@ -581,8 +583,8 @@ class RefDetectorErrorModel:
             )
         return dem
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
-    @property    
+    @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)   
     def hyperedges(self) -> tuple["DemHyperedge", ...]:
         """
         we don't need to put all the hyperedges in the graph. If multiple hyperedges have
@@ -632,18 +634,18 @@ class RefDetectorErrorModel:
             for detectors, (probability, observables) in mapping.items()
         )
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def hyperedges_detectors_set(self) -> frozenset[frozenset[int]]:
         return frozenset(dem_hyperedge.detectors for dem_hyperedge in self.hyperedges)
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def _dem(self) -> stim.DetectorErrorModel:
         return self.dem()
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def initializer(self) -> mwpf.SolverInitializer:
         vertex_num = self._dem.num_detectors
         weighted_edges = [
@@ -655,8 +657,8 @@ class RefDetectorErrorModel:
         ]
         return mwpf.SolverInitializer(vertex_num, weighted_edges)
 
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     @property
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def predictor(self) -> "StaticPredictor":
         fault_masks = [
             sum(1 << k for k in dem_hyperedge.observables)

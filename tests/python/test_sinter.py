@@ -2,9 +2,9 @@ from common import *
 import stim
 import sinter
 import numpy as np
+from mwpf.sinter_decoders import PanicAction
 
-
-params = dict(panic_action=mwpf.PanicAction.RAISE)
+params = dict(panic_action=PanicAction.RAISE)
 
 
 @pytest.mark.parametrize(
