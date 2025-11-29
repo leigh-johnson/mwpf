@@ -1,6 +1,6 @@
 [package]
 name = "mwpf"
-version = "0.2.12+fixmemleak2"
+version = "0.2.12+fixmemleak3"
 authors = ["Yue Wu <wuyue16pku@gmail.com>"]
 edition = "2021"
 license = "MIT"

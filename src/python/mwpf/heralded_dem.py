@@ -3,7 +3,7 @@ Regular Detector Error Model (DEM) does not contain the information of the heral
 This HeraldedDetectorErrorModel class provides additional information on the heralded errors.
 It is capable of reading bits from the detector which corresponds to the heralded error indicator.
 
-Note that in order to let the tool read a heralded error in the circuit, it is required that 
+Note that in order to let the tool read a heralded error in the circuit, it is required that
 the heralded error is detected using `DETECTOR rec[...]` where `rec[...]` corresponds to the heralded event.
 To help user, we provide a function that automatically adds such detections.
 
@@ -11,6 +11,7 @@ To help user, we provide a function that automatically adds such detections.
 1. the measurement of a heralded error must be either not detected or uniquely detected by a detector
 ``
 """
+
 import os
 import stim
 from .ref_circuit import (
@@ -32,7 +33,8 @@ import numpy as np
 
 DEM_MIN_PROBABILITY = 1e-15  # below this value, DEM starts to ignore the error rate
 
-MAX_CACHE_SIZE = os.environ.get("MWPF_MAX_CACHE_SIZE", 1024)
+MAX_CACHE_SIZE = os.environ.get("MWPF_MAX_CACHE_SIZE", None)
+
 
 # avoid non-zero small probability to be ignored by the DEM
 def dem_probability(probability: float) -> float:

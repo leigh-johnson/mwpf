@@ -1,8 +1,8 @@
 """
-The Circuit object in stim always write in relative measurement index, 
+The Circuit object in stim always write in relative measurement index,
 which is great for writing loops but not so great for analyzing the measurements.
 Especially, if we want to analyze the effect of certain heralded errors, we will
-need to keep the rest of the measurements in the same place. However, removing or 
+need to keep the rest of the measurements in the same place. However, removing or
 adding one heralded error will change all the relative measurement indices, making it
 especially hard to track and analyze the circuit.
 
@@ -27,6 +27,7 @@ circuit_2 = ref_circuit.to_circuit()  # convert the ref_circuit back to stim.Cir
 print(circuit_2)  # print the circuit in relative indices
 ```
 """
+
 import os
 import stim
 from dataclasses import dataclass, field
@@ -38,7 +39,7 @@ from frozendict import frozendict
 from frozenlist import FrozenList
 import mwpf
 
-MAX_CACHE_SIZE = os.environ.get("MWPF_MAX_CACHE_SIZE", 1024)
+MAX_CACHE_SIZE = os.environ.get("MWPF_MAX_CACHE_SIZE", None)
 
 
 @dataclass(frozen=True)
@@ -584,7 +585,7 @@ class RefDetectorErrorModel:
         return dem
 
     @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)   
+    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def hyperedges(self) -> tuple["DemHyperedge", ...]:
         """
         we don't need to put all the hyperedges in the graph. If multiple hyperedges have
