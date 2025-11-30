@@ -146,9 +146,14 @@ RefDetector: TypeAlias = RefInstruction
 @dataclass(frozen=True, eq=True)
 class RefCircuit:
     instructions: tuple[RefInstruction, ...]
+    _hash: int = 0
 
     def __post_init__(self):
         self.sanity_check()
+        object.__setattr__(self, "_hash", hash(self.instructions))
+
+    def __hash__(self):
+        return self._hash
 
     @staticmethod
     def of(
