@@ -3,7 +3,7 @@ Regular Detector Error Model (DEM) does not contain the information of the heral
 This HeraldedDetectorErrorModel class provides additional information on the heralded errors.
 It is capable of reading bits from the detector which corresponds to the heralded error indicator.
 
-Note that in order to let the tool read a heralded error in the circuit, it is required that 
+Note that in order to let the tool read a heralded error in the circuit, it is required that
 the heralded error is detected using `DETECTOR rec[...]` where `rec[...]` corresponds to the heralded event.
 To help user, we provide a function that automatically adds such detections.
 
@@ -154,7 +154,8 @@ class HeraldedDetectorErrorModel:
         #     HERALDED_ERASE -> DEPOLARIZE1(false_positive_rate)
         #     HERALDED_PAULI_CHANNEL_1 -> PAULI_CHANNEL_1(...)
         for instruction in self.heralded_instructions:
-            instruction_index = self.ref_circuit.instruction_to_index[instruction]
+            instruction_index = self.ref_circuit.instructions.index(instruction)
+            # instruction_index = self.ref_circuit.instruction_to_index[instruction]
             noise_instruction = heralded_instruction_to_noise_instruction(instruction)
             if noise_instruction is None:
                 deleting_indices.append(instruction_index)
@@ -171,7 +172,8 @@ class HeraldedDetectorErrorModel:
         # then delete detectors of the heralded errors
         for detector in self.heralded_detectors:
             if detector is not None:
-                deleting_indices.append(self.ref_circuit.instruction_to_index[detector])
+                deleting_indices.append(self.ref_circuit.instructions.index(detector))
+                # deleting_indices.append(self.ref_circuit.instruction_to_index[detector])
         assert len(set(deleting_indices)) == len(deleting_indices), "bug: duplicate"
         for index in sorted(deleting_indices, reverse=True):
             del new_instructions[index]
@@ -215,9 +217,8 @@ class HeraldedDetectorErrorModel:
                 len(all_noise_instruction.targets)
                 == heralded_instruction.num_measurements
             ), "the following code assumes target has a heralding measurement"
-            new_circuit_instructions[
-                circuit_no_noise.instruction_to_index[heralded_instruction]
-            ] = RefInstruction(
+            check_index = circuit_no_noise.instructions.index(heralded_instruction)
+            new_circuit_instructions[check_index] = RefInstruction(
                 name=all_noise_instruction.name,
                 targets=(all_noise_instruction.targets[ref_rec.bias],),
                 gate_args=all_noise_instruction.gate_args,
@@ -402,14 +403,15 @@ def add_herald_detectors(circuit: stim.Circuit) -> stim.Circuit:
     for heralded_instruction in reversed(heralded_instructions):
         for rec in reversed(heralded_instruction.recs):
             if not ref_circuit.rec_to_detectors[rec]:
+                insert_index = ref_circuit.instructions.index(heralded_instruction) + 1
                 new_instructions.insert(
-                    ref_circuit.instruction_to_index[heralded_instruction] + 1,
+                    insert_index,
                     RefInstruction(
                         name="DETECTOR",
                         targets=(rec,),
                     ),
                 )
-    return RefCircuit.of(new_instructions).circuit
+    return RefCircuit.of(new_instructions).circuit()
 
 
 def remove_herald_detectors(circuit: stim.Circuit) -> stim.Circuit:
@@ -435,7 +437,7 @@ def remove_herald_detectors(circuit: stim.Circuit) -> stim.Circuit:
         assert isinstance(rec, RefRec)
         if not is_heralded_error(rec.instruction):
             new_instructions.append(instruction)
-    return RefCircuit.of(new_instructions).circuit
+    return RefCircuit.of(new_instructions).circuit()
 
 
 def is_heralded_error(instruction: RefInstruction) -> bool:

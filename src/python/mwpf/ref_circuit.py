@@ -1,8 +1,8 @@
 """
-The Circuit object in stim always write in relative measurement index, 
+The Circuit object in stim always write in relative measurement index,
 which is great for writing loops but not so great for analyzing the measurements.
 Especially, if we want to analyze the effect of certain heralded errors, we will
-need to keep the rest of the measurements in the same place. However, removing or 
+need to keep the rest of the measurements in the same place. However, removing or
 adding one heralded error will change all the relative measurement indices, making it
 especially hard to track and analyze the circuit.
 
@@ -75,7 +75,8 @@ class RefInstruction:
         return len(self.recs)
 
     def index(self, circuit: "RefCircuit") -> int:
-        return circuit.instruction_to_index[self]
+        return circuit.instructions.index(self)
+        # return circuit.instruction_to_index[self]
 
     def __eq__(self, other: object) -> bool:
         return self is other  # avoiding value-based comparison
@@ -249,11 +250,12 @@ class RefCircuit:
             }
         )
 
-    @functools.cached_property
-    def instruction_to_index(self) -> frozendict[RefInstruction, int]:
-        return frozendict(
-            {instruction: index for index, instruction in enumerate(self.instructions)}
-        )
+    # fix-memleak4 optimization: use Python .index() lookup
+    # @functools.cached_property
+    # def instruction_to_index(self) -> frozendict[RefInstruction, int]:
+    #     return frozendict(
+    #         {instruction: index for index, instruction in enumerate(self.instructions)}
+    #     )
 
     @functools.cached_property
     def instruction_rec_biases(self) -> tuple[int, ...]:
@@ -315,7 +317,6 @@ class RefCircuit:
     def ref_dem(self) -> "RefDetectorErrorModel":
         return RefDetectorErrorModel.of(self)
 
-    @functools.cached_property
     def circuit(self) -> stim.Circuit:
         circuit = stim.Circuit()
         for stim_instruction in self.stim_instructions:
@@ -448,7 +449,8 @@ class RefCircuit:
                         len(detector.targets) == 1
                     ), "bug: detector of a heralded error has multiple targets"
                     if detector not in keeping:
-                        deleting_indices.append(self.instruction_to_index[detector])
+                        delete_index = self.instructions.index(detector)
+                        deleting_indices.append(delete_index)
         assert len(set(deleting_indices)) == len(deleting_indices), "bug: duplicate"
         for index in sorted(deleting_indices, reverse=True):
             del new_instructions[index]
@@ -512,7 +514,7 @@ class RefDetectorErrorModel:
     ) -> "RefDetectorErrorModel":
         if dem is None:
             assert ref_circuit is not None, "circuit and dem cannot be both None"
-            dem = ref_circuit.circuit.detector_error_model(
+            dem = ref_circuit.circuit().detector_error_model(
                 approximate_disjoint_errors=True, flatten_loops=True
             )
         if ref_circuit is None:
