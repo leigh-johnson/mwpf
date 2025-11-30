@@ -81,8 +81,7 @@ class HeraldedDetectorErrorModel:
                     + "we require that the detector of a heralded error must only detect one rec"
                 )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def heralded_instructions(self) -> tuple[RefInstruction, ...]:
         return tuple(
             instruction
@@ -90,8 +89,7 @@ class HeraldedDetectorErrorModel:
             if is_heralded_error(instruction)
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def heralded_measurements(self) -> tuple[RefRec, ...]:
         return tuple(
             rec
@@ -100,8 +98,7 @@ class HeraldedDetectorErrorModel:
             for rec in instruction.recs
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def detected_heralded_measurements(self) -> tuple[RefRec, ...]:
         return tuple(
             rec
@@ -109,8 +106,7 @@ class HeraldedDetectorErrorModel:
             if self.ref_circuit.rec_to_detectors[rec]
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def undetected_heralded_measurements(self) -> tuple[RefRec, ...]:
         return tuple(
             rec
@@ -118,8 +114,7 @@ class HeraldedDetectorErrorModel:
             if not self.ref_circuit.rec_to_detectors[rec]
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def heralded_detectors(self) -> tuple[RefDetector | None, ...]:
         heralded_measurements = frozenset(self.heralded_measurements)
         return tuple(
@@ -127,8 +122,7 @@ class HeraldedDetectorErrorModel:
             for detector in self.ref_circuit.detectors
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def heralded_detector_indices(self) -> tuple[int, ...]:
         return tuple(
             {
@@ -138,8 +132,7 @@ class HeraldedDetectorErrorModel:
             }
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def detector_id_to_herald_id(self) -> frozendict[int, int]:
         return frozendict(
             {
@@ -148,13 +141,10 @@ class HeraldedDetectorErrorModel:
             }
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
     def num_heralds(self) -> int:
         return len(self.heralded_detector_indices)
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def skeleton_circuit(self) -> RefCircuit:
         """
         The skeleton circuit is a circuit where all the heralded errors are not triggered.
@@ -190,8 +180,7 @@ class HeraldedDetectorErrorModel:
             del new_instructions[index]
         return RefCircuit.of(new_instructions)
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def skeleton_dem(self) -> RefDetectorErrorModel:
         """
         construct a dem whose detector id corresponds to the detectors of the original circuit
@@ -203,8 +192,7 @@ class HeraldedDetectorErrorModel:
             instructions=ref_dem.instructions, ref_circuit=self.ref_circuit
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def heralded_dems(
         self,
     ) -> frozendict[RefDetector, RefDetectorErrorModel]:
@@ -273,8 +261,7 @@ class HeraldedDetectorErrorModel:
                 )
         return result
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def hyperedge_to_index(self) -> frozendict[frozenset[int], int]:
         return frozendict(
             {
@@ -283,8 +270,7 @@ class HeraldedDetectorErrorModel:
             }
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def herald_fault_map(self) -> tuple[frozendict[int, tuple[float, int]], ...]:
         heralds: list[frozendict[int, tuple[float, int]]] = []
         for detector_id in self.heralded_detector_indices:
@@ -307,8 +293,7 @@ class HeraldedDetectorErrorModel:
             )
         return tuple(heralds)
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def initializer(self) -> mwpf.SolverInitializer:
         vertex_num = self.skeleton_dem._dem.num_detectors
         weighted_edges = [
@@ -324,8 +309,7 @@ class HeraldedDetectorErrorModel:
         ]
         return mwpf.SolverInitializer(vertex_num, weighted_edges, heralds=heralds)
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def predictor(self) -> "HeraldedDemPredictor":
         fault_masks_with_p = tuple(
             (sum(1 << k for k in dem_hyperedge.observables), dem_hyperedge.probability)

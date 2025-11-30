@@ -42,7 +42,7 @@ import mwpf
 MAX_CACHE_SIZE = os.environ.get("MWPF_MAX_CACHE_SIZE", None)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class RefRec:
     instruction: "RefInstruction"
     bias: int
@@ -65,7 +65,7 @@ class RefRec:
         return hash(id(self))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class RefInstruction:
     name: str
     targets: tuple[stim.GateTarget | RefRec, ...] = ()
@@ -507,14 +507,14 @@ def is_noise_channel_instruction(
     return False
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class RefDemInstruction:
     type: str
     args: tuple[float, ...] = ()
     targets: tuple[int | stim.DemTarget | RefDetector, ...] = ()
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class RefDetectorErrorModel:
     instructions: tuple[RefDemInstruction, ...]
     ref_circuit: RefCircuit
@@ -584,8 +584,7 @@ class RefDetectorErrorModel:
             )
         return dem
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def hyperedges(self) -> tuple["DemHyperedge", ...]:
         """
         we don't need to put all the hyperedges in the graph. If multiple hyperedges have
@@ -635,18 +634,15 @@ class RefDetectorErrorModel:
             for detectors, (probability, observables) in mapping.items()
         )
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def hyperedges_detectors_set(self) -> frozenset[frozenset[int]]:
         return frozenset(dem_hyperedge.detectors for dem_hyperedge in self.hyperedges)
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def _dem(self) -> stim.DetectorErrorModel:
         return self.dem()
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def initializer(self) -> mwpf.SolverInitializer:
         vertex_num = self._dem.num_detectors
         weighted_edges = [
@@ -658,8 +654,7 @@ class RefDetectorErrorModel:
         ]
         return mwpf.SolverInitializer(vertex_num, weighted_edges)
 
-    @property
-    @functools.lru_cache(maxsize=MAX_CACHE_SIZE)
+    @functools.cached_property
     def predictor(self) -> "StaticPredictor":
         fault_masks = [
             sum(1 << k for k in dem_hyperedge.observables)
@@ -722,7 +717,7 @@ class StaticPredictor(Predictor):
         return self.num_obs
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=True)
 class DemHyperedge:
     detectors: frozenset[int]
     observables: frozenset[int]
