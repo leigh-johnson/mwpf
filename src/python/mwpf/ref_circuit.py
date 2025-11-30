@@ -62,7 +62,7 @@ class RefRec:
         return self is other  # avoiding value-based comparison
 
     def __hash__(self) -> int:
-        return hash(id(self))
+        return id(self)
 
 
 @dataclass(frozen=True, eq=True)
@@ -84,7 +84,7 @@ class RefInstruction:
         return self is other  # avoiding value-based comparison
 
     def __hash__(self) -> int:
-        return hash(id(self))
+        return id(self)
 
     @staticmethod
     def new_heralded_erase(

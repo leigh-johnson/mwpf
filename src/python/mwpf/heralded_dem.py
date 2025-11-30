@@ -141,6 +141,7 @@ class HeraldedDetectorErrorModel:
             }
         )
 
+    @property
     def num_heralds(self) -> int:
         return len(self.heralded_detector_indices)
 
